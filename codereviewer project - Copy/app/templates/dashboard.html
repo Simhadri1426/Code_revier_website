@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fade-in">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary rounded-circle p-3 me-3">
+                    <i class="fas fa-user text-white fs-4"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1">Welcome back, {{ current_user.name }}!</h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-chart-line me-1"></i>Here's your coding journey overview
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-grid gap-3 d-md-flex">
+                <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary btn-lg flex-fill">
+                    <i class="fas fa-plus me-2"></i>Submit New Code
+                </a>
+                <a href="{{ url_for('code.history') }}" class="btn btn-outline-primary btn-lg flex-fill">
+                    <i class="fas fa-history me-2"></i>View History
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-clock me-2 text-primary"></i>
+                    <h5 class="mb-0">Recent Submissions</h5>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                        {% for submission in submissions %}
+                        <div class="submission-item p-3 border-bottom {% if not loop.last %}mb-3{% endif %}">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge bg-secondary me-2">
+                                            <i class="fas fa-code me-1"></i>{{ submission.language }}
+                                        </span>
+                                        <h6 class="mb-0">Submission #{{ submission.id }}</h6>
+                                    </div>
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ submission.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
+                                    </p>
+                                    <p class="mb-0 text-truncate">
+                                        {{ submission.code_text[:100] }}{% if submission.code_text|length > 100 %}...{% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    {% if submission.ai_score %}
+                                        <div class="mb-2">
+                                            <span class="badge {% if submission.ai_score >= 80 %}bg-success{% elif submission.ai_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                <i class="fas fa-star me-1"></i>Score: {{ submission.ai_score }}/100
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    <a href="{{ url_for('code.view_feedback', submission_id=submission.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>View Feedback
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-code text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                            <h5 class="text-muted">No submissions yet</h5>
+                            <p class="text-muted">Start by submitting your first piece of code for review!</p>
+                            <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Submit Code
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i>
+                    <h5 class="mb-0">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle p-2 me-3">
+                            <i class="fas fa-file-code text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ submissions|length }}</h6>
+                            <small class="text-muted">Total Submissions</small>
+                        </div>
+                    </div>
+                    
+                    {% if submissions %}
+                        {% set avg_score = (submissions|map(attribute='ai_score')|select|list|sum) / (submissions|map(attribute='ai_score')|select|list|length) %}
+                        <div class="stat-item d-flex align-items-center mb-3">
+                            <div class="bg-success rounded-circle p-2 me-3">
+                                <i class="fas fa-star text-white"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ "%.1f"|format(avg_score) }}/100</h6>
+                                <small class="text-muted">Average Score</small>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="stat-item d-flex align-items-center mb-3">
+                        <div class="bg-info rounded-circle p-2 me-3">
+                            <i class="fas fa-language text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ submissions|map(attribute='language')|unique|list|length }}</h6>
+                            <small class="text-muted">Languages Used</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6 class="mb-2">Languages Used:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for lang in submissions|map(attribute='language')|unique %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-code me-1"></i>{{ lang }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-lightbulb me-2 text-primary"></i>
+                    <h5 class="mb-0">Quick Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="tip-item mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Submit code regularly to track your progress</small>
+                    </div>
+                    <div class="tip-item mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Review feedback to improve your coding skills</small>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <small>Try different programming languages</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.submission-item {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.submission-item:hover {
+    background-color: rgba(99, 102, 241, 0.05);
+    transform: translateX(4px);
+}
+
+.stat-item {
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+}
+
+.tip-item {
+    transition: all 0.3s ease;
+}
+
+.tip-item:hover {
+    transform: translateX(4px);
+}
+</style>
+{% endblock %} 

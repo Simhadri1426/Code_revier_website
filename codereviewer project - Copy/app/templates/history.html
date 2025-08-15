@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fade-in">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary rounded-circle p-3 me-3">
+                    <i class="fas fa-history text-white fs-4"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1">Submission History</h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-filter me-1"></i>View and filter your past code submissions
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-filter me-2 text-primary"></i>
+                    <h5 class="mb-0">Filter Submissions</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="language" class="form-label">
+                                <i class="fas fa-language me-2"></i>Language
+                            </label>
+                            <select class="form-select" id="language" name="language">
+                                <option value="">All Languages</option>
+                                <option value="python" {% if language_filter == 'python' %}selected{% endif %}>🐍 Python</option>
+                                <option value="javascript" {% if language_filter == 'javascript' %}selected{% endif %}>🟨 JavaScript</option>
+                                <option value="java" {% if language_filter == 'java' %}selected{% endif %}>☕ Java</option>
+                                <option value="cpp" {% if language_filter == 'cpp' %}selected{% endif %}>⚡ C++</option>
+                                <option value="csharp" {% if language_filter == 'csharp' %}selected{% endif %}>💎 C#</option>
+                                <option value="php" {% if language_filter == 'php' %}selected{% endif %}>🐘 PHP</option>
+                                <option value="ruby" {% if language_filter == 'ruby' %}selected{% endif %}>💎 Ruby</option>
+                                <option value="go" {% if language_filter == 'go' %}selected{% endif %}>🐹 Go</option>
+                                <option value="rust" {% if language_filter == 'rust' %}selected{% endif %}>🦀 Rust</option>
+                                <option value="swift" {% if language_filter == 'swift' %}selected{% endif %}>🍎 Swift</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="score" class="form-label">
+                                <i class="fas fa-star me-2"></i>Score Range
+                            </label>
+                            <select class="form-select" id="score" name="score">
+                                <option value="">All Scores</option>
+                                <option value="high" {% if score_filter == 'high' %}selected{% endif %}>High (80-100)</option>
+                                <option value="medium" {% if score_filter == 'medium' %}selected{% endif %}>Medium (50-79)</option>
+                                <option value="low" {% if score_filter == 'low' %}selected{% endif %}>Low (0-49)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="fas fa-search me-2"></i>Filter
+                            </button>
+                            <a href="{{ url_for('code.history') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Submissions List -->
+    <div class="row">
+        <div class="col-12">
+            {% if submissions.items %}
+                {% for submission in submissions.items %}
+                <div class="card mb-3 submission-card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-secondary me-2">
+                                        <i class="fas fa-code me-1"></i>{{ submission.language }}
+                                    </span>
+                                    <h6 class="mb-0">Submission #{{ submission.id }}</h6>
+                                </div>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ submission.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
+                                </p>
+                                <p class="mb-0 text-truncate">
+                                    {{ submission.code_text[:200] }}{% if submission.code_text|length > 200 %}...{% endif %}
+                                </p>
+                            </div>
+                            <div class="col-lg-4 text-end">
+                                {% if submission.ai_score %}
+                                    <div class="mb-2">
+                                        <span class="badge {% if submission.ai_score >= 80 %}bg-success{% elif submission.ai_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            <i class="fas fa-star me-1"></i>Score: {{ submission.ai_score }}/100
+                                        </span>
+                                    </div>
+                                {% endif %}
+                                <a href="{{ url_for('code.view_feedback', submission_id=submission.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>View Feedback
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if submissions.pages > 1 %}
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <nav aria-label="Submission history pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if submissions.has_prev %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('code.history', page=submissions.prev_num, language=language_filter, score=score_filter) }}">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for page_num in submissions.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != submissions.page %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ url_for('code.history', page=page_num, language=language_filter, score=score_filter) }}">{{ page_num }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ page_num }}</span>
+                                            </li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if submissions.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('code.history', page=submissions.next_num, language=language_filter, score=score_filter) }}">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                {% endif %}
+                
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-search text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-muted">No submissions found</h5>
+                        <p class="text-muted">
+                            {% if language_filter or score_filter %}
+                                No submissions match your current filters. Try adjusting your search criteria.
+                            {% else %}
+                                You haven't submitted any code yet. Start by submitting your first piece of code!
+                            {% endif %}
+                        </p>
+                        <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Submit Code
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Submit New Code
+                </a>
+                <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.submission-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.submission-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.pagination .page-link {
+    border: none;
+    color: #6366f1;
+    padding: 0.75rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #9ca3af;
+    background-color: transparent;
+}
+
+.form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+</style>
+{% endblock %} 

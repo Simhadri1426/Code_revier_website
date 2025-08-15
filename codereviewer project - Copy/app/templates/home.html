@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <div class="mb-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-code text-white" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+                <h1 class="display-4 mb-3 fw-bold">Welcome to CodeReviewer</h1>
+                <p class="lead mb-4 fs-5 text-muted">
+                    Get instant AI-powered code reviews and suggestions to improve your programming skills. 
+                    Perfect for students and beginners learning Python, JavaScript, and more.
+                </p>
+            </div>
+            
+            <div class="row mb-5 g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-robot text-white fs-4"></i>
+                            </div>
+                            <h5 class="card-title mb-3">AI Analysis</h5>
+                            <p class="card-text text-muted">
+                                Get detailed feedback on code quality, formatting, and best practices from our advanced AI system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-chart-line text-white fs-4"></i>
+                            </div>
+                            <h5 class="card-title mb-3">Code Scoring</h5>
+                            <p class="card-text text-muted">
+                                Receive a comprehensive score from 0-100 based on readability, structure, and best practices.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="fas fa-comments text-white fs-4"></i>
+                            </div>
+                            <h5 class="card-title mb-3">Inline Comments</h5>
+                            <p class="card-text text-muted">
+                                AI-generated comments explain your code logic and functionality for better understanding.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h4 class="mb-2">Ready to improve your coding skills?</h4>
+                                    <p class="text-muted mb-0">
+                                        Join thousands of developers who are already using CodeReviewer to enhance their programming abilities.
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    {% if current_user.is_authenticated %}
+                                        <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-plus me-2"></i>Submit Code
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-rocket me-2"></i>Get Started
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <div class="d-flex gap-3 justify-content-center">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Submit Code
+                        </a>
+                        <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Get Started
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.feature-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.display-4 {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px -3px rgba(99, 102, 241, 0.3);
+}
+
+.btn-outline-primary {
+    border: 2px solid #6366f1;
+    color: #6366f1;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: #6366f1;
+    border-color: #6366f1;
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %} 

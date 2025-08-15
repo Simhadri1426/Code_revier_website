@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fade-in">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('dashboard.dashboard') }}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Feedback</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-primary rounded-circle p-3 me-3">
+                    <i class="fas fa-robot text-white fs-4"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1">Code Review Results</h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-hashtag me-1"></i>Submission #{{ submission.id }} - 
+                        <i class="fas fa-calendar me-1"></i>{{ submission.timestamp.strftime('%B %d, %Y at %I:%M %p') }}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Language Information -->
+            {% if submission.detected_language and submission.detected_language != submission.language %}
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <div>
+                    <strong>Language Mismatch Detected:</strong> 
+                    You selected <strong>{{ submission.language.upper() }}</strong> but the system detected <strong>{{ submission.detected_language.upper() }}</strong> code. 
+                    The analysis was performed for the detected language.
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Score Display -->
+            {% if submission.ai_score %}
+            <div class="card mb-4">
+                <div class="card-body text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-line text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="mb-3">Code Quality Score</h3>
+                    <div class="mb-3">
+                        <span class="badge {% if submission.ai_score >= 80 %}bg-success{% elif submission.ai_score >= 50 %}bg-warning{% else %}bg-danger{% endif %} fs-1 px-4 py-3">
+                            <i class="fas fa-star me-2"></i>{{ submission.ai_score }}/100
+                        </span>
+                    </div>
+                    <p class="text-muted fs-5">
+                        {% if submission.ai_score >= 80 %}
+                            <i class="fas fa-trophy text-warning me-2"></i>Excellent! Your code follows best practices well.
+                        {% elif submission.ai_score >= 50 %}
+                            <i class="fas fa-thumbs-up text-info me-2"></i>Good effort! There's room for improvement.
+                        {% else %}
+                            <i class="fas fa-lightbulb text-warning me-2"></i>Keep practicing! Review the suggestions below.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- AI Feedback -->
+            {% if submission.feedback %}
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-robot me-2 text-primary"></i>
+                    <h5 class="mb-0">AI Analysis & Suggestions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="feedback-content">{{ submission.feedback|safe }}</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Plagiarism Hints -->
+            {% if submission.plagiarism_hints %}
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-search me-2 text-primary"></i>
+                    <h5 class="mb-0">Plagiarism Detection</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">{{ submission.plagiarism_hints }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Original Code -->
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-code me-2 text-primary"></i>
+                    <h5 class="mb-0">Original Code</h5>
+                    <span class="badge bg-secondary ms-auto">{{ submission.language }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="code-container">
+                        <pre><code class="hljs language-{{ submission.language }}">{{ submission.code_text }}</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inline Comments -->
+            {% if submission.comments %}
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-comments me-2 text-primary"></i>
+                    <h5 class="mb-0">AI Comments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="code-container">
+                        <pre><code class="hljs language-{{ submission.language }}">{{ submission.comments }}</code></pre>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('code.submit_code') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Submit New Code
+                </a>
+                <a href="{{ url_for('code.history') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-history me-2"></i>View History
+                </a>
+                <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Highlight.js for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/cpp.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    hljs.highlightAll();
+});
+</script>
+
+<style>
+.breadcrumb {
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item a {
+    color: #6366f1;
+    font-weight: 500;
+}
+
+.breadcrumb-item.active {
+    color: #64748b;
+}
+
+.code-container {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.code-container pre {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.whitespace-pre-wrap {
+    white-space: pre-wrap;
+}
+
+.feedback-content {
+    line-height: 1.6;
+}
+
+.feedback-content h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+.feedback-content h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: none;
+}
+
+.feedback-content h3 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.feedback-content h4 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #34495e;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.feedback-content ul, .feedback-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.feedback-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.feedback-content ul ul, .feedback-content ol ol {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-content ul ul li, .feedback-content ol ol li {
+    margin-bottom: 0.25rem;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.feedback-content ul li strong, .feedback-content ol li strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.feedback-content strong {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.feedback-content em {
+    font-style: italic;
+    color: #7f8c8d;
+}
+
+.feedback-content code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+.feedback-content pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.feedback-content blockquote {
+    border-left: 4px solid #3498db;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.feedback-content ul li strong {
+    background: rgb(123, 118, 247);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+    margin-right: 0.5rem;
+}
+
+/* Custom scrollbar for code containers */
+.code-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.code-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.code-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.code-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+</style>
+{% endblock %} 
